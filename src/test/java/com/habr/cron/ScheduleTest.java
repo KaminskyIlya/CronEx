@@ -670,4 +670,73 @@ public class ScheduleTest
     }
 
 
+    @Test(dataProvider = "generatorDataProvider")
+    public void testGenerator(String schedule, String startDate, String[] expectedList) throws Exception
+    {
+        f.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date start = f.parse(startDate);
+
+        Schedule s = new Schedule(schedule);
+        ScheduleEventsGenerator generator = s.getEventsGenerator(start, true);
+
+        for (String item : expectedList)
+        {
+            Date expected = f.parse(item);
+            Date actual = generator.next();
+
+            assertEquals(actual, expected,
+                    "\n" +
+                            f.format(expected) + " <- expected" +
+                            "\n" +
+                            f.format(actual) + " <- actual ");
+        }
+    }
+    @DataProvider
+    public Object[][] generatorDataProvider()
+    {
+        return new Object[][]{
+                {"*:*:*", "17.11.2021 14:00:00.000",
+                        new String[]{
+                                "17.11.2021 14:00:01.000",
+                                "17.11.2021 14:00:02.000",
+                                "17.11.2021 14:00:03.000",
+                                "17.11.2021 14:00:04.000",
+                                "17.11.2021 14:00:05.000",
+                        }
+                },
+                {"*:*:*.*/100", "17.11.2021 14:00:00.000",
+                        new String[]{
+                                "17.11.2021 14:00:00.100",
+                                "17.11.2021 14:00:00.200",
+                                "17.11.2021 14:00:00.300",
+                                "17.11.2021 14:00:00.400",
+                                "17.11.2021 14:00:00.500",
+                        }
+                },
+                {"*.*.32 12:00:00", "01.01.2020 11:30:23.157",
+                        new String[]{
+                                "31.01.2020 12:00:00.000",
+                                "29.02.2020 12:00:00.000",
+                                "31.03.2020 12:00:00.000",
+                                "30.04.2020 12:00:00.000",
+                                "31.05.2020 12:00:00.000",
+                                "30.06.2020 12:00:00.000",
+                                "31.07.2020 12:00:00.000",
+                                "31.08.2020 12:00:00.000",
+                                "30.09.2020 12:00:00.000",
+                                "31.10.2020 12:00:00.000",
+                                "30.11.2020 12:00:00.000",
+                                "31.12.2020 12:00:00.000",
+                        }
+                },
+                {"*.*.31 3 12:14:34", "01.03.2019 12:00:00.000",
+                        new String[]{
+                                "31.07.2019 12:14:34.000",
+                                "31.03.2021 12:14:34.000",
+                                "31.08.2022 12:14:34.000",
+                                "31.05.2023 12:14:34.000",
+                        }
+                },
+        };
+    }
 }

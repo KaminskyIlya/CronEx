@@ -13,7 +13,7 @@ import java.util.TimeZone;
  * The average time of event search is 400ns.
  * Thread-Safe. Unmodifiable.
  *
- * Format or schedule:
+ * Format of schedule:
  *     yyyy.MM.dd w HH:mm:ss.fff            date, day of week, time with milliseconds
  *     yyyy.MM.dd HH:mm:ss.fff              date & time with milliseconds
  *     HH:mm:ss.fff                         time only
@@ -186,13 +186,15 @@ public class Schedule implements Cron
         {
             calendar = new GregCalendar(start, UTC);
             digits = new CalendarDigits(pool, calendar, mode.toZero());
+            date = start;
 
             while ( isCanSearchDown(digits, calendar, mode.canEqual()) )
             {
                 digits.next();
             }
 
-            date = fixWeekDay(digits, calendar);
+            // don't do it; next() calls it first
+            // fixWeekDay(digits, calendar);
         }
 
         public Date last()
@@ -202,9 +204,13 @@ public class Schedule implements Cron
 
         public Date next()
         {
+            date = fixWeekDay(digits, calendar); // fix date for previous result
+
+            // prepare to calculate the next result
             digits.gotoLastDigit();
             digits.increment();
-            return date = fixWeekDay(digits, calendar);
+
+            return date; // return fixed previous result
         }
 
         public String schedule()
