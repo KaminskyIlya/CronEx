@@ -180,7 +180,7 @@ class MatcherPool
             }
             else if ( range.asterisk && range.step > 1 ) // all days of the week with step
             {
-                for (int i = 1; i <= 7; i += range.step)
+                for (int i = 1; i <= 31; i += range.step)
                     map.addValue(i);
             }
             else if ( range.isLastDay() ) // last day of the month

@@ -66,12 +66,12 @@ class LastDayOfMonthProxy implements DigitMatcher
 
     public boolean hasNext(int value)
     {
-        return value < getHigh();
+        return value < getHigh() && match(getNext(value));
     }
     
     public boolean hasPrev(int value)
     {
-        return value > getLow();
+        return value > getLow() && match(getPrev(value));
     }
 
     public int getLow()
