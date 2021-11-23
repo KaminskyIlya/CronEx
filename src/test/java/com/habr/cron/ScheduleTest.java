@@ -739,4 +739,19 @@ public class ScheduleTest
                 },
         };
     }
+
+    @Test
+    public void testGeneratorOnSmallRangeForMillisMustUseBitMap() throws Exception
+    {
+        f.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date start = f.parse("01.01.2021 00:00:00.000");
+
+        Schedule schedule = new Schedule("*:*:*.100-101,150-151");
+        ScheduleEventsGenerator generator = schedule.getEventsGenerator(start, true);
+
+        for (int i = 0; i < 10000; i++)
+        {
+            generator.next(); // MUST thrown ArrayIndexOutOfBoundsException only if we use HashMapMatcher
+        }
+    }
 }

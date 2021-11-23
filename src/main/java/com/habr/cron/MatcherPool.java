@@ -92,7 +92,7 @@ class MatcherPool
         return ranges.isAlone() ?
                 createSingleRange(ranges.getSingle(), element) // for schedule: 'a-b/n' or 'a', 'a-b'
                 :
-                createMultiRange(ranges); // for schedule: 'a,b-c,d,e-f/g,...'
+                createMultiRange(ranges, element); // for schedule: 'a,b-c,d,e-f/g,...'
     }
 
 
@@ -115,9 +115,9 @@ class MatcherPool
 
 
 
-    private DigitMatcher createMultiRange(RangeList ranges)
+    private DigitMatcher createMultiRange(RangeList ranges, ScheduleElements element)
     {
-        DigitMatcher matcher = getBestMatcherFor(ranges);
+        DigitMatcher matcher = getBestMatcherFor(ranges, element);
         MapMatcher map = (MapMatcher)matcher;
 
         for (Range range : ranges)
@@ -128,13 +128,15 @@ class MatcherPool
     }
 
 
-    private DigitMatcher getBestMatcherFor(RangeList ranges)
+    private DigitMatcher getBestMatcherFor(RangeList ranges, ScheduleElements element)
     {
         int min = ranges.getMinimum();
         int max = ranges.getMaximum();
 
         boolean large = (max - min) > HashMapMatcher.RANGE_LIMIT;
-        return large ? new BitMapMatcher(min, max) : new HashMapMatcher(min, max);
+        boolean overflow = (element.max - element.min) >= Byte.MAX_VALUE;
+
+        return large || overflow ? new BitMapMatcher(min, max) : new HashMapMatcher(min, max);
     }
 
 
