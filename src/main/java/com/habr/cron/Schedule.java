@@ -162,18 +162,20 @@ public class Schedule implements Cron
         GregCalendar calendar = new GregCalendar(date, UTC);
         CalendarDigits digits = new CalendarDigits(pool, calendar, mode.toZero());
 
+        // skip date check, if not present in schedule
+        if ( pool.isAnyDate() ) digits.gotoHours();
+
         while ( isCanSearchDown(digits, calendar, mode.canEqual()) )
         {
             digits.next();
         }
 
-        return fixWeekDay(digits, calendar);
+        return pool.isAnyWeekDay() ? calendar.asDate() : fixWeekDay(digits, calendar);
     }
 
 
     /**
      * Makes events generator.
-     * TODO: test it
      */
     private final class EventsGenerator implements ScheduleEventsGenerator
     {
@@ -181,11 +183,13 @@ public class Schedule implements Cron
         private final GregCalendar calendar;
         private final CalendarDigits digits;
         private Date date;
+        boolean fix;
 
         public EventsGenerator(Date start, SearchMode mode)
         {
             calendar = new GregCalendar(start, UTC);
             digits = new CalendarDigits(pool, calendar, mode.toZero());
+            fix = pool.isAnyWeekDay();
             date = start;
 
             while ( isCanSearchDown(digits, calendar, mode.canEqual()) )
@@ -200,11 +204,11 @@ public class Schedule implements Cron
         public Date last()
         {
             return date;
-        }
+        } // for first call returns 'start'
 
         public Date next()
         {
-            date = fixWeekDay(digits, calendar); // fix date for previous result
+            date = fix ? calendar.asDate() : fixWeekDay(digits, calendar); // fix date for previous result
 
             // prepare to calculate the next result
             digits.gotoLastDigit();
@@ -279,15 +283,12 @@ public class Schedule implements Cron
     private Date fixWeekDay(CalendarDigits digits, GregCalendar calendar)
     {
         DaysMap weekMap = pool.getWeekDaysMap();
-        if ( !weekMap.isAsterisk() )
+        if ( !weekMap.contains(calendar.getDayOfWeek()) )
         {
-            if ( !weekMap.contains(calendar.getDayOfWeek()) )
-            {
-                findBestDate(digits, calendar, weekMap);
+            findBestDate(digits, calendar, weekMap);
 
-                digits.gotoHours();
-                digits.initialize();
-            }
+            digits.gotoHours();
+            digits.initialize();
         }
         return calendar.asDate();
     }
@@ -336,7 +337,7 @@ public class Schedule implements Cron
         do
         {
             if ( !digits.hasNext(year) )
-                throw new IllegalStateException(); // we went beyond the schedule
+                throw new IllegalStateException("Out of schedule interval"); // we went beyond the schedule
 
             year = digits.getNext(year);
             byte yearMap = GregCalendar.isLeap(year) == 1 ? ly : ny;

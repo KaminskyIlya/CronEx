@@ -13,12 +13,12 @@ final class RangeList implements Iterable<Range>
      */
     public static final RangeList ASTERISK = new RangeList(Range.ASTERISK);
 
-    private final Range[] list;
+    private Range[] list;
     private int count = 0;
 
-    public RangeList(int count)
+    public RangeList(int capacity)
     {
-        list = new Range[count];
+        list = new Range[capacity];
     }
 
     public RangeList(Range range)
@@ -32,13 +32,65 @@ final class RangeList implements Iterable<Range>
         list[count++] = range;
     }
 
+    public int getCount()
+    {
+        return count;
+    }
+
+    /**
+     * Checks when we can use ListOfRangesMatcher.
+     * NOTE: MUST be sorted before.
+     *
+     * @return true if all ranges are without step or have a step, but not intersects
+     */
+    public boolean isSimpleRanges()
+    {
+        if ( !isList() ) return false;
+
+        Range prev = null;
+
+        for (Range range : list)
+        {
+            if (range.isAsterisk()) return false;
+
+            if ( prev != null )
+            {
+                boolean intersects = range.isIntersects(prev);
+                boolean stepped = range.step > 1 || prev.step > 1;
+
+                if ( intersects && stepped )
+                    return false;
+            }
+            prev = range;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks when we can use ListOfIntervalsMatcher.
+     * NOTE: MUST be sorted before.
+     *
+     * @return true if all ranges are without step
+     */
+    public boolean isSimpleIntervals()
+    {
+        if ( !isList() ) return false;
+
+        for (Range range : list)
+            if ( range.isAsterisk() || range.isStepped() )
+                return false;
+
+        return true;
+    }
+
 
     /**
      * @return true, if it is single range
      */
     public boolean isAlone()
     {
-        return list.length == 1;
+        return count == 1;
     }
 
     /**
@@ -46,7 +98,7 @@ final class RangeList implements Iterable<Range>
      */
     public boolean isList()
     {
-        return list.length > 1;
+        return count > 1;
     }
 
     /**
@@ -55,6 +107,7 @@ final class RangeList implements Iterable<Range>
     public Range getSingle()
     {
         assert count == 1;
+
         return list[0];
     }
 
@@ -97,6 +150,38 @@ final class RangeList implements Iterable<Range>
     }
 
 
+    /**
+     * Sorts ranges in ascending order and merges overlapping ranges.
+     * Ranges MUST be a simple intervals (isSimpleRanges() == true)
+     */
+    public void optimize()
+    {
+        Arrays.sort(list);
+
+        assert isSimpleRanges();
+
+        int f = 0, n = 1;
+        Range first = list[f];
+
+        do
+        {
+            Range next = list[n++];
+
+            if ( !first.isIntersects(next) )
+            {
+                first = next; f++;
+            }
+            else
+                first.merge(next);
+
+            list[f] = first;
+        }
+        while ( n < count );
+
+        count = f + 1;
+        list = Arrays.copyOf(list, count);
+    }
+
     @Override
     public String toString()
     {
@@ -117,7 +202,7 @@ final class RangeList implements Iterable<Range>
 
         public boolean hasNext()
         {
-            return pos < list.length;
+            return pos < count;
         }
 
         public Range next()

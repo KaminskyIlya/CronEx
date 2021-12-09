@@ -3,77 +3,154 @@ package com.habr.cron;
 import org.testng.annotations.Test;
 
 import static com.habr.cron.ScheduleElements.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 public class MatcherPoolTest
 {
-    /*
-     * Test for correctness of creation
-     */
-    @Test
-    public void testCreationCorrectness() throws Exception
+    private ScheduleModel getDefaultModel()
     {
         ScheduleModel model = new ScheduleModel();
-        model.setModelFor(YEAR, new RangeList(new Range(2021, 2030))); // will be used IntervalMatcher
-        model.setModelFor(MONTH, new RangeList(new Range(3, true))); // will be used SteppingMatcher
-        model.setModelFor(SECONDS, new RangeList(new Range(32))); // will be used ConstantMatcher
-        model.setModelFor(DAY_OF_WEEK, RangeList.ASTERISK); // will be used IntervalMatcher
-        model.setModelFor(HOURS, new RangeList(new Range(10, 17, 3))); // will be used SteppingMatcher
-
-        RangeList minutes = new RangeList(2);
-        minutes.add(new Range(1, 5));
-        minutes.add(new Range(9, 32));
-        model.setModelFor(MINUTES, minutes); // will be used HashMapMatcher
-
-        RangeList days = new RangeList(2);
-        days.add(new Range(2, 7));
-        days.add(new Range(28, 32));
-        model.setModelFor(DAY_OF_MONTH, days);//will be used LastDayOfMonthProxy
-
-        RangeList millis = new RangeList(4);
-        millis.add(new Range(1, 10));
-        millis.add(new Range(100, 200));
-        millis.add(new Range(310, 390));
-        millis.add(new Range(400));
-        model.setModelFor(MILLIS, millis); // will be used BitMapMatcher
-
+        model.setModelFor(HOURS, RangeList.ASTERISK);
+        model.setModelFor(MINUTES, RangeList.ASTERISK);
+        model.setModelFor(SECONDS, RangeList.ASTERISK);
         model.initDefaults();
-        model.check("--test--");
+        return model;
+    }
+
+
+    @Test
+    public void testWeekMap() throws Exception
+    {
+        ScheduleModel model = getDefaultModel();
+        MatcherPool pool;
+
+        model.setModelFor(DAY_OF_WEEK, RangeList.ASTERISK);
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertEquals(pool.getWeekDaysMap().getMap(), DaysMap.FULL_MAP);
+
+
+        model.setModelFor(DAY_OF_WEEK, new RangeList(new Range(0))); // Sunday
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertEquals(pool.getWeekDaysMap().getMap(), Byte.valueOf("0000001", 2).byteValue());
+
+
+        model.setModelFor(DAY_OF_WEEK, new RangeList(new Range(2, true))); // even day
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertEquals(pool.getWeekDaysMap().getMap(), Byte.valueOf("1010101", 2).byteValue());
+
+
+        model.setModelFor(DAY_OF_WEEK, new RangeList(new Range(3, 5))); // from Wednesday to Friday
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertEquals(pool.getWeekDaysMap().getMap(), Byte.valueOf("0111000", 2).byteValue());
+
+
+        model.setModelFor(DAY_OF_WEEK, new RangeList(new Range(1, 5, 2))); // '1-5/2'
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertEquals(pool.getWeekDaysMap().getMap(), Byte.valueOf("0101010", 2).byteValue());
+    }
+
+
+    @Test
+    public void testIsAnyWeekDay() throws Exception
+    {
+        ScheduleModel model = getDefaultModel();
+        MatcherPool pool;
+
+
+        model.setModelFor(DAY_OF_WEEK, RangeList.ASTERISK);
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertTrue(pool.isAnyWeekDay());
+
+
+        model.setModelFor(DAY_OF_WEEK, new RangeList(new Range(0))); // Sunday
+        model.fixup();
+        pool = new MatcherPool(model);
+        assertFalse(pool.isAnyWeekDay());
+    }
+
+
+    @Test
+    public void testIsAnyDate() throws Exception
+    {
+        ScheduleModel model = getDefaultModel();
+        MatcherPool pool;
+
+        pool = new MatcherPool(model);
+        assertTrue(pool.isAnyDate());
+
+        model.setModelFor(MONTH, new RangeList(new Range(1, 3))); // First quarter of the any year
+        pool = new MatcherPool(model);
+        assertFalse(pool.isAnyDate());
+    }
+
+
+    @Test
+    public void testMonthMap() throws Exception
+    {
+        ScheduleModel model = getDefaultModel();
+
+        model.setModelFor(DAY_OF_WEEK, RangeList.ASTERISK);
         model.fixup();
 
-        MatcherPool pool = new MatcherPool(model);
-        Class actual;
-
-        actual = pool.getMatcherPool()[YEAR.ordinal()].getClass();
-        assertEquals(actual, IntervalMatcher.class);
-
-        actual = pool.getMatcherPool()[MONTH.ordinal()].getClass();
-        assertEquals(actual, SteppingMatcher.class);
-
-        actual = pool.getMatcherPool()[DAY_OF_MONTH.ordinal()].getClass();
-        assertEquals(actual, HashMapMatcher.class);
-
-        assertNull(pool.getMatcherPool()[DAY_OF_WEEK.ordinal()]);
-
-        actual = pool.getMatcherPool()[HOURS.ordinal()].getClass();
-        assertEquals(actual, SteppingMatcher.class);
-
-        actual = pool.getMatcherPool()[MINUTES.ordinal()].getClass();
-        assertEquals(actual, HashMapMatcher.class);
-
-        actual = pool.getMatcherPool()[SECONDS.ordinal()].getClass();
-        assertEquals(actual, ConstantMatcher.class);
-
-        actual = pool.getMatcherPool()[MILLIS.ordinal()].getClass();
-        assertEquals(actual, BitMapMatcher.class);
+        MatcherPool pool;
 
 
-
-        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(32))); // will be used LastDayOfMonthMatcher
+        // constant
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(1))); // 1th
         pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("0000001", 2).byteValue());
 
-        actual = pool.getMatcherPool()[DAY_OF_MONTH.ordinal()].getClass();
-        assertEquals(actual, ConstantMatcher.class);
+
+        // asterisk
+        model.setModelFor(DAY_OF_MONTH, RangeList.ASTERISK); // every 3 days
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), DaysMap.FULL_MAP);
+
+
+        // asterisk with step
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(3, true))); // every 3 days
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), DaysMap.FULL_MAP);
+
+        // asterisk with step
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(7, true))); // every 7 days
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("0000001", 2).byteValue());
+
+
+        // range with step
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(2, 31, 7))); // every 7 days
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("0000010", 2).byteValue());
+
+
+        // interval without step
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(1, 4))); // first four days
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("0001111", 2).byteValue());
+
+
+        // last day of month
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(LAST_DAY_OF_MONTH_CODE))); // 28-31
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("1000111", 2).byteValue());
+
+
+        // by last day
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(27, LAST_DAY_OF_MONTH_CODE))); // 27-31
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("1100111", 2).byteValue());
+
+
+        // by last day with step
+        model.setModelFor(DAY_OF_MONTH, new RangeList(new Range(27, LAST_DAY_OF_MONTH_CODE, 2))); // 27-31/2
+        pool = new MatcherPool(model);
+        assertEquals(pool.getMonthDaysMap().getMap(), Byte.valueOf("0100101", 2).byteValue());
     }
 }

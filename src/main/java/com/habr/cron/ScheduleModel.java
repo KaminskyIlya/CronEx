@@ -5,8 +5,9 @@ import java.util.GregorianCalendar;
 import static com.habr.cron.ScheduleElements.*;
 
 /**
- * Schedule model
- * Note: tested in ParserTest
+ * <p>Digital representation of the schedule to simplify the work.</p>
+ *
+ * <p><b>Note:</b> some tests runs across the ParserTest</p>
  */
 class ScheduleModel
 {
@@ -69,6 +70,30 @@ class ScheduleModel
     }
 
     /**
+     * <p>Checks, that date in schedule equals to '*.*.*'.<br/>
+     * <b>IMPORTANT:</b> must called after {@link #initDefaults()}</p>
+     *
+     * @return true, if date is equals to '*.*.*'
+     */
+    public boolean isAnyDate()
+    {
+        return model[YEAR.ordinal()] == RangeList.ASTERISK
+            && model[MONTH.ordinal()] == RangeList.ASTERISK
+            && model[DAY_OF_MONTH.ordinal()] == RangeList.ASTERISK;
+    }
+
+    /**
+     * <p>Checks, that day of week in schedule equals to any ('*').<br/>
+     * <b>IMPORTANT:</b> must called after {@link #initDefaults()}</p>
+     *
+     * @return true, if the day of week in schedule is not important
+     */
+    public boolean isAnyWeekDay()
+    {
+        return model[DAY_OF_WEEK.ordinal()] == RangeList.ASTERISK;
+    }
+
+    /**
      * Checks logical correctness of the model.
      *
      * @param sourceSchedule the string presentation of source schedule (for diagnostic messages)
@@ -83,15 +108,13 @@ class ScheduleModel
     }
 
     /**
-     * Makes some fixes in model for compatibility with Java's Calendar
+     * Makes some fixes in model for compatibility with Java's Calendar.
+     * Calls after check().
      */
     public void fixup()
     {
         // Shifts day of week ranges by one, for presentation of weekday (1..7) in Java's Calendar
         getModelFor(DAY_OF_WEEK).shiftBy(1);
-
-        // Shifts months ranges by one, for presentation of month (0..11) in Java's Calendar
-        //getModelFor(MONTH).shiftBy(-1);
     }
 
 

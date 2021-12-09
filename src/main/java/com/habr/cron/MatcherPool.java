@@ -3,6 +3,7 @@ package com.habr.cron;
 import java.util.GregorianCalendar;
 
 import static com.habr.cron.DaysMap.rollMapByMonth;
+import static com.habr.cron.ScheduleElements.*;
 
 /**
  * Builder of calendar elements' matcher's set.
@@ -27,6 +28,15 @@ class MatcherPool
     private final DaysMap normalYearMap;
     private final DaysMap leapYearMap;
 
+    /**
+     * Has true, if date skipped in schedule or equals to '*.*.*'
+     */
+    private final boolean anyDate;
+    /**
+     * Has true, if weekday not present in schedule or equals to '*'
+     */
+    private final boolean anyWeekDay;
+
 
 
     public MatcherPool(ScheduleModel model) throws ScheduleFormatException
@@ -34,17 +44,20 @@ class MatcherPool
         // create matcher's for schedule model
         for ( ScheduleElements element : ScheduleElements.values() )
         {
-            if ( element == ScheduleElements.DAY_OF_WEEK ) continue;
+            if ( element == DAY_OF_WEEK ) continue;
 
             RangeList ranges = model.getModelFor(element);
-            DigitMatcher matcher = createMatcherFor(ranges, element);
+            DigitMatcher matcher = MatcherFactory.createInstance(ranges, element);
             pool[element.ordinal()] = matcher;
         }
 
-        weekMap = createWeekMap(model.getModelFor(ScheduleElements.DAY_OF_WEEK)); // 1..7
-        monthMap = createMonthMap(model.getModelFor(ScheduleElements.DAY_OF_MONTH)); // 1..31
-        normalYearMap = createYearMap(model.getModelFor(ScheduleElements.MONTH), false);
-        leapYearMap = createYearMap(model.getModelFor(ScheduleElements.MONTH), true);
+        weekMap = createWeekMap(model.getModelFor(DAY_OF_WEEK)); // 1..7
+        monthMap = createMonthMap(model.getModelFor(DAY_OF_MONTH)); // 1..31
+        normalYearMap = createYearMap(model.getModelFor(MONTH), false);
+        leapYearMap = createYearMap(model.getModelFor(MONTH), true);
+
+        anyDate = model.isAnyDate();
+        anyWeekDay = model.isAnyWeekDay();
 
         try {
             fixYearsForLastFebruaryDay(model); // fix schedule for "???.02.29"
@@ -64,12 +77,12 @@ class MatcherPool
     {
         return weekMap;
     }
-    
+
     public DaysMap getMonthDaysMap()
     {
         return monthMap;
     }
-    
+
     public DaysMap getNormalYearMap()
     {
         return normalYearMap;
@@ -80,64 +93,18 @@ class MatcherPool
         return leapYearMap;
     }
 
-
-
-
-
-
-
-
-    private DigitMatcher createMatcherFor(RangeList ranges, ScheduleElements element)
+    public boolean isAnyDate()
     {
-        return ranges.isAlone() ?
-                createSingleRange(ranges.getSingle(), element) // for schedule: 'a-b/n' or 'a', 'a-b'
-                :
-                createMultiRange(ranges, element); // for schedule: 'a,b-c,d,e-f/g,...'
+        return anyDate;
     }
 
-
-    private DigitMatcher createSingleRange(Range range, ScheduleElements element)
+    public boolean isAnyWeekDay()
     {
-        if ( range.isAsterisk() ) // * or */n
-            return !range.isStepped() ?
-                    new IntervalMatcher(element.min, element.max)
-                    :
-                    new SteppingMatcher(element.min, element.max, range.step);
-
-        if ( range.isConstant() ) // single const value
-            return new ConstantMatcher(range.min);
-
-        return range.isStepped() ? // interval
-                new SteppingMatcher(range.min, range.max, range.step)
-                :
-                new IntervalMatcher(range.min, range.max);
+        return anyWeekDay;
     }
 
 
 
-    private DigitMatcher createMultiRange(RangeList ranges, ScheduleElements element)
-    {
-        DigitMatcher matcher = getBestMatcherFor(ranges, element);
-        MapMatcher map = (MapMatcher)matcher;
-
-        for (Range range : ranges)
-            map.addRange(range.min, range.max, range.step);
-
-        map.finishRange();
-        return matcher;
-    }
-
-
-    private DigitMatcher getBestMatcherFor(RangeList ranges, ScheduleElements element)
-    {
-        int min = ranges.getMinimum();
-        int max = ranges.getMaximum();
-
-        boolean large = (max - min) > HashMapMatcher.RANGE_LIMIT;
-        boolean overflow = (element.max - element.min) >= Byte.MAX_VALUE;
-
-        return large || overflow ? new BitMapMatcher(min, max) : new HashMapMatcher(min, max);
-    }
 
 
 
@@ -170,6 +137,8 @@ class MatcherPool
         }
         return map;
     }
+
+
 
     private DaysMap createMonthMap(RangeList ranges)
     {
@@ -217,6 +186,8 @@ class MatcherPool
         return map;
     }
 
+
+
     private DaysMap createYearMap(RangeList months, boolean forLeap)
     {
         DaysMap result = new DaysMap();
@@ -263,8 +234,8 @@ class MatcherPool
      */
     private void fixYearsForLastFebruaryDay(ScheduleModel model)
     {
-        RangeList monthRanges = model.getModelFor(ScheduleElements.MONTH);
-        RangeList dayRanges = model.getModelFor(ScheduleElements.DAY_OF_MONTH);
+        RangeList monthRanges = model.getModelFor(MONTH);
+        RangeList dayRanges = model.getModelFor(DAY_OF_MONTH);
 
         if ( monthRanges.isAlone() & dayRanges.isAlone() )
         {
@@ -273,8 +244,8 @@ class MatcherPool
 
             if ( m.isFebruary() && d.isLeapDay() ) // schedule is ?.2.29 ?
             {
-                DigitMatcher matcher = pool[ScheduleElements.YEAR.ordinal()]; // current year matcher, created by schedule
-                pool[ScheduleElements.YEAR.ordinal()] = applyLeapYearsForLastFebruaryDay(matcher);
+                DigitMatcher matcher = pool[YEAR.ordinal()]; // current year matcher, created by schedule
+                pool[YEAR.ordinal()] = applyLeapYearsForLastFebruaryDay(matcher);
 
             }
         }
@@ -289,8 +260,8 @@ class MatcherPool
      */
     private DigitMatcher applyLeapYearsForLastFebruaryDay(DigitMatcher planned)
     {
-        int min = findNearestLeapYearFrom(ScheduleElements.YEAR.min, +1); // for 2000 it returns 2000; for 2001 it returns 2004
-        int max = findNearestLeapYearFrom(ScheduleElements.YEAR.max, -1); // for 2100 it returns 2096
+        int min = findNearestLeapYearFrom(YEAR.min, +1); // for 2000 it returns 2000; for 2001 it returns 2004
+        int max = findNearestLeapYearFrom(YEAR.max, -1); // for 2100 it returns 2096
 
         BitMapMatcher filtered = new BitMapMatcher(min, max);
         int count = 0;
