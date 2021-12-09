@@ -4,7 +4,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-
 import static org.testng.Assert.*;
 
 /**
@@ -68,7 +67,7 @@ public class HashMapMatcherTest
 
 
     @Test(dataProvider = "getNextDataProvider")
-    public void testGetMajor(int value, int expected) throws Exception
+    public void testGetNext(int value, int expected) throws Exception
     {
         int actual = matcher.getNext(value);
         assertEquals(actual, expected, "HashMapMatcher return wrong next value.");
@@ -105,14 +104,14 @@ public class HashMapMatcherTest
                 {24, 27},
                 {25, 27},
                 {26, 27},
-                {27, 127},
+                {27, 127 + 1},
         };
     }
 
 
 
     @Test(dataProvider = "getPrevDataProvider")
-    public void testGetMinor(int value, int expected) throws Exception
+    public void testGetPrev(int value, int expected) throws Exception
     {
         int actual = matcher.getPrev(value);
         assertEquals(actual, expected, "HashMapMatcher return wrong prev value.");
@@ -123,7 +122,7 @@ public class HashMapMatcherTest
     {
         // value, expected result
         return new Object[][]{
-                {1, -1},
+                {1, 1 - 128},
                 {2, 1},
                 {3, 2},
                 {4, 2},
@@ -178,5 +177,36 @@ public class HashMapMatcherTest
         matcher.addRange(21, 31, 2);
         matcher.finishRange();
         assertEquals(matcher.getLow(), 2);
+    }
+
+    @Test
+    public void testFullRange() throws Exception
+    {
+        HashMapMatcher matcher = new HashMapMatcher(1, 64);
+        matcher.addRange(1, 20, 1);
+        matcher.addRange(40, 64, 1);
+        matcher.finishRange();
+
+        assertTrue(matcher.match(1));
+        assertTrue(matcher.match(20));
+        assertFalse(matcher.match(21));
+        assertFalse(matcher.match(39));
+        assertTrue(matcher.match(40));
+        assertTrue(matcher.match(64));
+
+        assertEquals(matcher.getNext(1), 2);
+        assertEquals(matcher.getNext(19), 20);
+        assertEquals(matcher.getNext(20), 40);
+        assertEquals(matcher.getNext(25), 40);
+        assertEquals(matcher.getNext(45), 46);
+        assertEquals(matcher.getNext(63), 64);
+        assertEquals(matcher.getNext(64), (int)(Byte.MAX_VALUE + 1));
+
+        assertEquals(matcher.getPrev(64), 63);
+        assertEquals(matcher.getPrev(63), 62);
+        assertEquals(matcher.getPrev(40), 20);
+        assertEquals(matcher.getPrev(20), 19);
+        assertEquals(matcher.getPrev(2), 1);
+        assertEquals(matcher.getPrev(1), (int)(Byte.MIN_VALUE + 1));
     }
 }

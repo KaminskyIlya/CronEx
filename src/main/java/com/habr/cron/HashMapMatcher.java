@@ -19,8 +19,8 @@ class HashMapMatcher implements DigitMatcher, MapMatcher
 {
     public static final int RANGE_LIMIT = 64;
 
-    private static final byte NO_NEXT = 127;
-    private static final byte NO_PREV = -1;
+    private static final byte NO_NEXT = Byte.MAX_VALUE;
+    private static final byte NO_PREV = Byte.MIN_VALUE;
 
     private int min; // minimal & maximal valid values of calendar's element
     private int max;
@@ -77,12 +77,12 @@ class HashMapMatcher implements DigitMatcher, MapMatcher
 
     public int getNext(int value)
     {
-        return next[value - min];
+        return next[value - min] + min;
     }
 
     public int getPrev(int value)
     {
-        return prev[value - min];
+        return prev[value - min] + min;
     }
 
     public boolean hasNext(int value)
@@ -130,7 +130,7 @@ class HashMapMatcher implements DigitMatcher, MapMatcher
             if ( match(i) )
             {
                 if ( low < min ) low = i;
-                p = (byte) i;
+                p = (byte) (i - min);
             }
             prev[j] = p;
         }
@@ -142,7 +142,7 @@ class HashMapMatcher implements DigitMatcher, MapMatcher
             next[j] = n;
             if ( match(i) )
             {
-                n = (byte) i;
+                n = (byte) (i - min);
                 if ( high > max ) high = i;
             }
         }
