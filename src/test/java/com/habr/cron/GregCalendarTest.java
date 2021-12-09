@@ -131,17 +131,73 @@ public class GregCalendarTest
     }
 
     @Test
-    public void testGetDayOfWeek() throws Exception {
+    public void testGetDayOfWeek() throws Exception
+    {
+        GregCalendar calendar = new GregCalendar(0);
+        calendar.year = 2021;
+        calendar.month = 2;
+        calendar.day = 28;
 
+        assertEquals(calendar.getDayOfWeek(), 0);
     }
 
     @Test
-    public void testSetValue() throws Exception {
+    public void testSetValue() throws Exception
+    {
+        GregCalendar calendar = new GregCalendar(0);
+        calendar.setValue(0, 2021);
+        calendar.setValue(1, 2);
+        calendar.setValue(2, 28);
+        calendar.setValue(3, 11);
+        calendar.setValue(4, 30);
+        calendar.setValue(5, 17);
+        calendar.setValue(6, 163);
 
+        assertEquals(calendar.year, 2021);
+        assertEquals(calendar.month, 2);
+        assertEquals(calendar.day, 28);
+        assertEquals(calendar.hours, 11);
+        assertEquals(calendar.minutes, 30);
+        assertEquals(calendar.seconds, 17);
+        assertEquals(calendar.milliseconds, 163);
     }
 
     @Test
-    public void testGetValue() throws Exception {
+    public void testGetValue() throws Exception
+    {
+        GregCalendar calendar = new GregCalendar(0);
+        calendar.year = 2021;
+        calendar.month = 2;
+        calendar.day = 28;
+        calendar.hours = 11;
+        calendar.minutes = 30;
+        calendar.seconds = 17;
+        calendar.milliseconds = 163;
 
+        assertEquals(calendar.getValue(0), 2021);
+        assertEquals(calendar.getValue(1), 2);
+        assertEquals(calendar.getValue(2), 28);
+        assertEquals(calendar.getValue(3), 11);
+        assertEquals(calendar.getValue(4), 30);
+        assertEquals(calendar.getValue(5), 17);
+        assertEquals(calendar.getValue(6), 163);
     }
+
+    @Test
+    public void testGetMaxDays() throws Exception
+    {
+        assertEquals(GregCalendar.maxDays(2021, 2), 28);
+        assertEquals(GregCalendar.maxDays(2020, 2), 29);
+        assertEquals(GregCalendar.maxDays(2020, 1), 31);
+        assertEquals(GregCalendar.maxDays(2020, 3), 31);
+        assertEquals(GregCalendar.maxDays(2020, 5), 31);
+        assertEquals(GregCalendar.maxDays(2020, 7), 31);
+        assertEquals(GregCalendar.maxDays(2020, 8), 31);
+        assertEquals(GregCalendar.maxDays(2020, 10), 31);
+        assertEquals(GregCalendar.maxDays(2020, 4), 30);
+        assertEquals(GregCalendar.maxDays(2020, 6), 30);
+        assertEquals(GregCalendar.maxDays(2020, 9), 30);
+        assertEquals(GregCalendar.maxDays(2020, 11), 30);
+    }
+
 }

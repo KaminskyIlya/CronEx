@@ -14,62 +14,62 @@ public class RollMaps
     public void testRollMapByYear() throws Exception
     {
         DaysMap map = new DaysMap();
-        map.addValue(1); // добавим 1-е число в воскресенье (01.01.1995)
+        map.addValue(1); // we will add the 1st day on Sunday (01.01.1995)
 
         Byte actual, expected;
 
-        // посмотрим как изменится эта карта в 1996-м году:
+        // let's see how this map will change in 1996:
         actual = DaysMap.rollMapByYear(map.getMap(), 1996);
-        expected = Byte.valueOf("0000010", 2);  // понедельник
+        expected = Byte.valueOf("0000010", 2);  // Monday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 1997-м году:
+        // let's see how this map will change in 1997:
         actual = DaysMap.rollMapByYear(map.getMap(), 1997);
-        expected = Byte.valueOf("0001000", 2);  // среда
+        expected = Byte.valueOf("0001000", 2);  // Wednesday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 1998-м году:
+        // let's see how this map will change in 1998:
         actual = DaysMap.rollMapByYear(map.getMap(), 1998);
-        expected = Byte.valueOf("0010000", 2); // четверг
+        expected = Byte.valueOf("0010000", 2); // Thursday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 1999-м году:
+        // let's see how this map will change in 1999:
         actual = DaysMap.rollMapByYear(map.getMap(), 1999);
-        expected = Byte.valueOf("0100000", 2); // пятница
+        expected = Byte.valueOf("0100000", 2); // Friday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 2000-м году:
+        // let's see how this map will change in 2000:
         actual = DaysMap.rollMapByYear(map.getMap(), 2000);
-        expected = Byte.valueOf("1000000", 2);  // суббота
+        expected = Byte.valueOf("1000000", 2);  // Saturday
         assertEquals(actual, expected);
 
 
 
-        map.addValue(4); // добавим ещё 4-е число в среду (01.01.1995)
+        map.addValue(4); // we will add another 4th on Wednesday (01.01.1995)
 
-        // посмотрим как изменится эта карта в 1996-м году:
+        // let's see how this map will change in 1996:
         actual = DaysMap.rollMapByYear(map.getMap(), 1996);
-        expected = Byte.valueOf("0010010", 2); // понедельник, четверг
+        expected = Byte.valueOf("0010010", 2); // Monday, Thursday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 1997-м году:
+        // let's see how this map will change in 1997:
         actual = DaysMap.rollMapByYear(map.getMap(), 1997);
-        expected = Byte.valueOf("1001000", 2); // среда, суббота
+        expected = Byte.valueOf("1001000", 2); // Wednesday, Saturday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 1998-м году:
+        // let's see how this map will change in 1998:
         actual = DaysMap.rollMapByYear(map.getMap(), 1998);
-        expected = Byte.valueOf("0010001", 2); // четверг, воскресенье
+        expected = Byte.valueOf("0010001", 2); // Thursday, Sunday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 1999-м году:
+        // let's see how this map will change in 1999:
         actual = DaysMap.rollMapByYear(map.getMap(), 1999);
-        expected = Byte.valueOf("0100010", 2); // пятница, понедельник
+        expected = Byte.valueOf("0100010", 2); // Friday, Monday
         assertEquals(actual, expected);
 
-        // посмотрим как изменится эта карта в 2000-м году:
+        // let's see how this map will change in 2000:
         actual = DaysMap.rollMapByYear(map.getMap(), 2000);
-        expected = Byte.valueOf("1000100", 2); // суббота, вторник
+        expected = Byte.valueOf("1000100", 2); // Saturday, Tuesday
         assertEquals(actual, expected);
     }
 
@@ -81,10 +81,11 @@ public class RollMaps
         Byte actual, expected, initial;
 
         DaysMap map = new DaysMap();
-        map.addValue(1); // добавим 1-е число в воскресенье (01.01.1995)
-        initial = DaysMap.rollMapByYear(map.getMap(), 2021); // приведем карту к 2021-му году
+        map.addValue(1); // we will add the 1st day on Sunday (01.01.1995)
+        initial = DaysMap.rollMapByYear(map.getMap(), 2021); // let's bring the map to 2021
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, false); // прокрутка до января не меняет карту
+        // scrolling to January doesn't change the map
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, false);
         assertEquals(actual, initial, "01.01.2021 MUST be a Friday and have map 0100000");
 
         actual = DaysMap.rollMapByMonth(initial, Calendar.FEBRUARY + 1, false);
@@ -132,20 +133,35 @@ public class RollMaps
         assertEquals(actual, expected, "01.12.2021 MUST be a Wednesday and has map 0001000");
 
 
-        initial = DaysMap.rollMapByYear(map.getMap(), 1996); // приведем карту к 1996-му году
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true); // прокрутка до января не меняет карту
-        assertEquals(actual, initial, "01.01.1996 MUST be a Thursday and have map 0010000");
-
-        actual = DaysMap.rollMapByMonth(initial, Calendar.OCTOBER + 1, true); // прокрутка до января не меняет карту
-        expected = Byte.valueOf("0000100", 2);
-        assertEquals(actual, expected, "01.10.1996 MUST be a Tuesday and have map 0000100");
 
 
+        initial = DaysMap.rollMapByYear(map.getMap(), 1996); // let's bring the map to 1996
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true);  // scrolling to January doesn't change the map
+        assertEquals(actual, initial, "01.01.1996 MUST be a Monday and have map 0010000");
+
+        actual = DaysMap.rollMapByMonth(initial, Calendar.APRIL + 1, true);
+        expected = Byte.valueOf("0000010", 2);
+        assertEquals(actual, expected, "01.04.1996 MUST be a Monday and have map 0000010"); // same as january for leap years
+
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JULY + 1, true);
+        expected = Byte.valueOf("0000010", 2);
+        assertEquals(actual, expected, "01.07.1996 MUST be a Monday and have map 0000010"); // same as january for leap years
 
 
-        initial = DaysMap.rollMapByYear(map.getMap(), 2020); // приведем карту к 2020-му году
+        initial = DaysMap.rollMapByYear(map.getMap(), 1997); // let's bring the map to 1997
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true);  // scrolling to January doesn't change the map
+        assertEquals(actual, initial, "01.01.1997 MUST be a Wednesday and have map 0001000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true); // прокрутка до января не меняет карту
+        actual = DaysMap.rollMapByMonth(initial, Calendar.OCTOBER + 1, false);
+        expected = Byte.valueOf("0001000", 2);
+        assertEquals(actual, expected, "01.10.1997 MUST be a Wednesday and have map 0001000"); // same as january for non-leap years
+
+
+
+
+        initial = DaysMap.rollMapByYear(map.getMap(), 2020); // let's bring the map to 2020
+
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true); // scrolling to January doesn't change the map
         assertEquals(actual, initial, "01.01.2020 MUST be a Wednesday and have map 0001000");
 
         actual = DaysMap.rollMapByMonth(initial, Calendar.FEBRUARY + 1, true);

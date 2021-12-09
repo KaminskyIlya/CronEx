@@ -18,25 +18,25 @@ public class ParserTest
     private Object[][] parseInvalid_DataProvider()
     {
         return new Object[][] {
-            // не заданное расписание
-            {""}, {null}, {"  \t \n "}, // пустая или "псевдо"-пустая строка
-            // что угодно, но только не расписание
+            // an unspecified schedule
+            {""}, {null}, {"  \t \n "}, // empty or "pseudo"-an empty string
+            // anything but the schedule
             {"tarabarschina"}, {"-"}, {"3-.32.32"}, {"a-b"},
-            // неверный порядок следования компонентов даты
+            // incorrect order of date components
             {"*:*:* *.*.*"}, {"*.*.*"}, {"*.*.* *"}, {"*:*:* *"}, {"*:*:* * *"},
-            // неверное число элементов в раписании
-            {"*:*:*:*"}, {"*.*"},
-            // звездочка среди списка ,*,   но при этом ,*/n, допустимо
+            // incorrect number of items in the schedule
+            {"*:*:*:*"}, {"*.*"}, {"*.*.*.*"},
+            // an asterisk in the list ,*, but at the same time ,*/n, is allowed
             {"*:*:*.100,200,*,400"},
-            // меньшее > большего
+            // less > more
             {"15-7:00:00"},
-            // выход за допустимые границы в расписании элемента
+            // out of range of the element
+            {"1-8 12:00:00"},
+            // going beyond the acceptable limits in the element schedule
             {"24:00:00"}, {"1999.01.12 12:00:00"}, {"2000.13.01 12:00:00"}, {"2000.12.33 12:00:00"},
-            // задан диапазон "28-32" and "28-32/n" для дней
-            //solved {"2020.*.28-32 *:*:*"}, {"2020.*.28-32/2 *:*:*"},
-            // явно задан високосный день 02.29 для невисокосного года
+            // the leap day 02.29 is explicitly set for a non-leap year
             {"2021.2.29 12:*:*"},
-            // пропущен компонент даты или времени
+            // missing date or time component
             {"2021.2 12:*:*"}, {"2021.2.29 12:*"}, {"12:*.123"},
         };
     }
