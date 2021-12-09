@@ -48,16 +48,24 @@ public class GeneratorBench
         return (n2 - n1) / LOOP_COUNT;
     }
 
-    private static final String[][] TEST_DATES = new String[][] {
+    private static final String[][] TEST_DATES = new String[][]
+    {
             // generate with step 1ms
             {"*:*:*.*", "17.11.2021 14:00:00.001"},
             // generate with step 5ms
-            {"*:*:*.*/5", "17.11.2021 14:00:00.000"},
+            {"*:*:*.5", "17.11.2021 14:00:00.000"},
             // generate with step 1sec
             {"*:*:*", "17.11.2021 14:00:00.000"},
             // complexity schedule; expected 26.01.2026 12:46:39.320 at the end
             {"*.1,10.5-26/7 1 12:*:*.320", "01.01.2000 00:00:00.000"},
             // complexity schedule; expected 31.03.2027 12:46:39.000 at the end
             {"*.*.31 3 12:*:*", "01.01.2000 00:00:00.000"},
+
+            {"*:*:*.100-200,400-600", "01.01.2021 00:00:00.000"},
+            {"*:*:*.100-200/10,400-600/10", "01.01.2021 00:00:00.000"},
+            {"*:*:*.100-200,150-160", "01.01.2021 00:00:00.000"}, //opt will use IntervalMatcher after optimize
+            {"*:*:*.100-101,150-151", "01.01.2021 00:00:00.000"}, //opt will use HashMapMatcher
+            {"*:*:*.10-20,120-130,140-150,260-290,310-315,410-420,520-530,640-650,760-790,970-999",
+                    "01.01.2021 00:00:00.000"},
     };
 }

@@ -58,7 +58,7 @@ class CalendarDigits implements DigitMatcher
      */
     public void prev()
     {
-        if ( current-- < FIRST ) throw new IllegalStateException(OUT_MESSAGE);
+        if ( --current < FIRST ) throw new IllegalStateException(OUT_MESSAGE);
     }
 
     /**

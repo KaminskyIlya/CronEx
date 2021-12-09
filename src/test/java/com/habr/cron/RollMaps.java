@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 import java.util.Calendar;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 public class RollMaps
 {
@@ -84,59 +84,59 @@ public class RollMaps
         map.addValue(1); // добавим 1-е число в воскресенье (01.01.1995)
         initial = DaysMap.rollMapByYear(map.getMap(), 2021); // приведем карту к 2021-му году
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY+1, false); // прокрутка до января не меняет карту
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, false); // прокрутка до января не меняет карту
         assertEquals(actual, initial, "01.01.2021 MUST be a Friday and have map 0100000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.FEBRUARY+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.FEBRUARY + 1, false);
         expected = Byte.valueOf("0000010", 2);
         assertEquals(actual, expected, "01.02.2021 MUST be a Monday and has map 0000010");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.MARCH+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.MARCH + 1, false);
         expected = Byte.valueOf("0000010", 2);
         assertEquals(actual, expected, "01.03.2021 MUST be a Monday and has map 0000010");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.APRIL+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.APRIL + 1, false);
         expected = Byte.valueOf("0010000", 2);
         assertEquals(actual, expected, "01.04.2021 MUST be a Thursday and has map 0010000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.MAY+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.MAY + 1, false);
         expected = Byte.valueOf("1000000", 2);
         assertEquals(actual, expected, "01.05.2021 MUST be a Saturday and has map 1000000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JUNE+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JUNE + 1, false);
         expected = Byte.valueOf("0000100", 2);
         assertEquals(actual, expected, "01.06.2021 MUST be a Tuesday and has map 0000100");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JULY+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JULY + 1, false);
         expected = Byte.valueOf("0010000", 2);
         assertEquals(actual, expected, "01.07.2021 MUST be a Thursday and has map 0010000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.AUGUST+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.AUGUST + 1, false);
         expected = Byte.valueOf("0000001", 2);
         assertEquals(actual, expected, "01.08.2021 MUST be a Sunday and has map 0000001");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.SEPTEMBER+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.SEPTEMBER + 1, false);
         expected = Byte.valueOf("0001000", 2);
         assertEquals(actual, expected, "01.09.2021 MUST be a Wednesday and has map 0001000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.OCTOBER+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.OCTOBER + 1, false);
         expected = Byte.valueOf("0100000", 2);
         assertEquals(actual, expected, "01.10.2021 MUST be a Friday and has map 0100000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.NOVEMBER+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.NOVEMBER + 1, false);
         expected = Byte.valueOf("0000010", 2);
         assertEquals(actual, expected, "01.11.2021 MUST be a Monday and has map 0000010");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.DECEMBER+1, false);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.DECEMBER + 1, false);
         expected = Byte.valueOf("0001000", 2);
         assertEquals(actual, expected, "01.12.2021 MUST be a Wednesday and has map 0001000");
 
 
         initial = DaysMap.rollMapByYear(map.getMap(), 1996); // приведем карту к 1996-му году
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY+1, true); // прокрутка до января не меняет карту
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true); // прокрутка до января не меняет карту
         assertEquals(actual, initial, "01.01.1996 MUST be a Thursday and have map 0010000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.OCTOBER+1, true); // прокрутка до января не меняет карту
+        actual = DaysMap.rollMapByMonth(initial, Calendar.OCTOBER + 1, true); // прокрутка до января не меняет карту
         expected = Byte.valueOf("0000100", 2);
         assertEquals(actual, expected, "01.10.1996 MUST be a Tuesday and have map 0000100");
 
@@ -145,22 +145,22 @@ public class RollMaps
 
         initial = DaysMap.rollMapByYear(map.getMap(), 2020); // приведем карту к 2020-му году
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY+1, true); // прокрутка до января не меняет карту
+        actual = DaysMap.rollMapByMonth(initial, Calendar.JANUARY + 1, true); // прокрутка до января не меняет карту
         assertEquals(actual, initial, "01.01.2020 MUST be a Wednesday and have map 0001000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.FEBRUARY+1, true);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.FEBRUARY + 1, true);
         expected = Byte.valueOf("1000000", 2);
         assertEquals(actual, expected, "01.02.2020 MUST be a Saturday and has map 1000000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.MARCH+1, true);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.MARCH + 1, true);
         expected = Byte.valueOf("0000001", 2);
         assertEquals(actual, expected, "01.03.2020 MUST be a Saturday and has map 0000001");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.APRIL+1, true);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.APRIL + 1, true);
         expected = Byte.valueOf("0001000", 2);
         assertEquals(actual, expected, "01.04.2020 MUST be a Wednesday and has map 0001000");
 
-        actual = DaysMap.rollMapByMonth(initial, Calendar.MAY+1, true);
+        actual = DaysMap.rollMapByMonth(initial, Calendar.MAY + 1, true);
         expected = Byte.valueOf("0100000", 2);
         assertEquals(actual, expected, "01.05.2020 MUST be a Friday and has map 0100000");
     }

@@ -19,8 +19,8 @@ class BitMapMatcher implements DigitMatcher, MapMatcher
 {
     private final int min; // the boundaries of calendar's element
     private final int max;
-    private int low = -1; // minimal & maximal allowed values according the schedule
-    private int high = 1001; // MUST initialized in finishRange()
+    private int low = Integer.MIN_VALUE; // minimal & maximal allowed values according the schedule
+    private int high = Integer.MAX_VALUE; // MUST initialized in finishRange()
 
     /**
      * bit map for allow calendar element values
@@ -148,18 +148,6 @@ class BitMapMatcher implements DigitMatcher, MapMatcher
     {
         low = match(min) ? min : getNext(min);
         high = match(max) ? max : getPrev(max);
-
-//        low = min - 1;
-//        for (int i = min; i < max && low < min; i++)
-//        {
-//            if ( match(i) ) low = i;
-//        }
-//
-//        high = max + 1;
-//        for (int i = max; i >= min && high > max; i--)
-//        {
-//            if ( match(i) ) high = i;
-//        }
     }
 
     public void addValue(int value)
