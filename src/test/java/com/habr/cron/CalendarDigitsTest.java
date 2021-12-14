@@ -139,7 +139,7 @@ public class CalendarDigitsTest
     @Test
     public void testInitialize_ForFixedSchedule() throws Exception
     {
-        // set calendar to random date
+        // set calendar to any date before date in schedule ("09.12.2021 12:30:51.100")
         calendar.year = 2000;
         calendar.month = 1;
         calendar.day = 1;

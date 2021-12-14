@@ -1,7 +1,6 @@
 package com.habr.cron;
 
 import java.util.Date;
-import java.util.Iterator;
 
 /**
  * Generator of scheduled events.
@@ -16,6 +15,7 @@ public interface ScheduleEventsGenerator
 
     /**
      * @return the date of next event after last
+     * @throws IllegalStateException when the next value if out of schedule
      */
     Date next();
 

@@ -1,5 +1,7 @@
 package com.habr.cron;
 
+import static com.habr.cron.ScheduleElements.FEBRUARY_LEAP_DAY;
+
 /**
  * Not thread safe. Stateful class. Internal used.
  */
@@ -11,16 +13,28 @@ class CalendarDigits implements DigitMatcher
     private int current = FIRST;
     final boolean toZero;
 
+    /**
+     * Creates a pseudo-"number" consists digits based on calendar.
+     *
+     * @param pool storage of matchers for all date components.
+     * @param calendar current value of calendar
+     * @param resetMode direction of operations:
+     *                  if <b>true</b> we search next values, resets every digits to low bound;
+     *                  if <b>false</b> we search prev values, resets every digits to high bound.
+     */
     public CalendarDigits(MatcherPool pool, GregCalendar calendar, boolean resetMode)
     {
-        DigitMatcher m[] = pool.getMatcherPool();
+        DigitMatcher m[] = pool.getMatchersForSchedule();
         DigitMatcher dayMatcher = m[ScheduleElements.DAY_OF_MONTH.ordinal()];
-        LastDayOfMonthProxy proxy = new LastDayOfMonthProxy(dayMatcher, calendar);
+        if ( isNeedProxy(dayMatcher)  )
+        {
+            dayMatcher = new LastDayOfMonthProxy(dayMatcher, calendar);
+        }
 
         matchers = new DigitMatcher[]{
                 m[ScheduleElements.YEAR.ordinal()],      // 0 = FIRST = YEAR_IDX
                 m[ScheduleElements.MONTH.ordinal()],     // 1 = MONTH_IDX
-                proxy,                  // 2 = DAY_IDX
+                dayMatcher,                              // 2 = DAY_IDX
                 m[ScheduleElements.HOURS.ordinal()],     // 3 = HOURS_IDX
                 m[ScheduleElements.MINUTES.ordinal()],   // 4
                 m[ScheduleElements.SECONDS.ordinal()],   // 5
@@ -39,6 +53,16 @@ class CalendarDigits implements DigitMatcher
     private static final int HOURS_IDX = 3;
 
     private static final String OUT_MESSAGE = "Out of schedule interval";
+
+
+    private boolean isNeedProxy(DigitMatcher dayMatcher)
+    {
+        int min = dayMatcher.getLow();
+        int max = dayMatcher.getHigh();
+
+        boolean canUseNativeMatcher = ( min <= max && max < FEBRUARY_LEAP_DAY ); // ?..28
+        return !canUseNativeMatcher;
+    }
 
 
 
@@ -241,7 +265,7 @@ class CalendarDigits implements DigitMatcher
 
             if ( init ) current++; else current--;
         }
-        while ( FIRST <= current && current <= LAST);
+        while ( FIRST <= current && current <= LAST );
 
 
         if ( current < FIRST ) throw new IllegalStateException(OUT_MESSAGE); // out of schedule bounds (on top)

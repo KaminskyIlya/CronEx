@@ -45,13 +45,13 @@ final class RangeList implements Iterable<Range>
      */
     public boolean isSimpleRanges()
     {
-        if ( !isList() ) return false;
+        if ( !isList() ) return true;
 
         Range prev = null;
 
         for (Range range : list)
         {
-            if (range.isAsterisk()) return false;
+            if ( range.isAsterisk() ) return false;
 
             if ( prev != null )
             {
@@ -69,13 +69,12 @@ final class RangeList implements Iterable<Range>
 
     /**
      * Checks when we can use ListOfIntervalsMatcher.
-     * NOTE: MUST be sorted before.
      *
      * @return true if all ranges are without step
      */
     public boolean isSimpleIntervals()
     {
-        if ( !isList() ) return false;
+        if ( !isList() ) return true;
 
         for (Range range : list)
             if ( range.isAsterisk() || range.isStepped() )
@@ -151,13 +150,20 @@ final class RangeList implements Iterable<Range>
 
 
     /**
-     * Sorts ranges in ascending order and merges overlapping ranges.
+     * Sorts ranges in ascending order
+     */
+    public void sort()
+    {
+        Arrays.sort(list);
+    }
+
+    /**
+     * Merges overlapping ranges.
      * Ranges MUST be a simple intervals (isSimpleRanges() == true)
+     * Ranges MUST be sorted before
      */
     public void optimize()
     {
-        Arrays.sort(list);
-
         assert isSimpleRanges();
 
         int f = 0, n = 1;

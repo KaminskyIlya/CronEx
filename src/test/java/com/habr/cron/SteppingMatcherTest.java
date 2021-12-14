@@ -32,6 +32,11 @@ public class SteppingMatcherTest
             {new Range(5, 63, 3),  62,      true},
             {new Range(5, 63, 3),  63,      false},
             {new Range(5, 63, 3),  64,      false},
+            // not happens in production code; match not control overflow!
+//            {new Range(5, 63, 3),  2,       false},
+//            {new Range(5, 63, 3),  3,       false},
+//            {new Range(5, 63, 3),  4,       false},
+//            {new Range(5, 63, 3),  65,      false},
         };
     }
 

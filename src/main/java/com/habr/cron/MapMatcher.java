@@ -7,7 +7,8 @@ interface MapMatcher
 {
     /**
      * Adds a values range in schedule map.
-     * Ranges can overlap without problems.
+     * IMPORTANT: Some matchers don't like overlaped ranges.
+     * See a matcher's description class.
      *
      * @param from begin value (include)
      * @param to end value (include)

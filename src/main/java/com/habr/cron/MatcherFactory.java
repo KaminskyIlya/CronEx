@@ -49,12 +49,14 @@ class MatcherFactory
         int max = ranges.getMaximum();
 
         // for small ranges we can use simple hashMap
-        if ( (max - min) < HashMapMatcher.RANGE_LIMIT )
+        if ( ArrayMatcher.isCanApplied(min, max) )
         {
-            HashMapMatcher hash = new HashMapMatcher(min, max);
+            ArrayMatcher hash = new ArrayMatcher(min, max);
             setRanges(hash, ranges);
             return hash;
         }
+
+        ranges.sort(); // sort ranges before checks
 
         // if ranges have complexity - we use bit map
         if ( !ranges.isSimpleRanges() )
@@ -64,31 +66,27 @@ class MatcherFactory
             return bits;
         }
 
-        // sorts ranges and combines overlapped
-        ranges.optimize();
+        ranges.optimize(); // combines overlapped ranges
 
         // after optimize we can get only one range (for example: '10-20,15-30' = '10-30')
         if ( ranges.isAlone() )
             return createSimpleMatcher(ranges.getSingle(), element);
 
-
-        //
-        // Ok. Now we will choose one of two: bits or list.
-        //
-        BitMapMatcher bits = new BitMapMatcher(min, max);
-        setRanges(bits, ranges);
-
-        // When count of ranges over than 8 the bits map will always better
-        if ( ranges.getCount() > 10 ) return bits;
+        // when count of ranges over than 8 the bits map will always better
+        if ( ranges.getCount() > 10 )
+        {
+            BitMapMatcher bits = new BitMapMatcher(min, max);
+            setRanges(bits, ranges);
+            return bits;
+        }
 
         // different intervals with and without steps requires different algo
-        DigitMatcher list = ranges.isSimpleIntervals() ?
+        ListsMatcher list = ranges.isSimpleIntervals() ?
                 new ListOfIntervalsMatcher(min, max, ranges.getCount())
             :
                 new ListOfRangesMatcher(min, max, ranges.getCount());
 
-        setRanges((MapMatcher) list, ranges);
-
+        setRanges(list, ranges);
         return list;
     }
 

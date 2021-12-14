@@ -2,7 +2,7 @@ package com.habr.cron;
 
 /**
  * Special matcher for milliseconds.
- * Handles a complex schedules, such as '40,100-120,200-300/3,500-501'.
+ * Handles a complex schedules, such as '40,100-120,200-300,500-501'.
  * Intervals MUST be without steps, sorted in ascending order and not be intersects!
  * Used if a small set of ranges is specified (not over 8).
  *

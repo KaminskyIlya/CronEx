@@ -8,16 +8,12 @@ package com.habr.cron;
  */
 class DaysMap
 {
-    /*
-        We believe that we set the days of January 1995.
-        Because for 01.01.1995 fell on Sunday, that is,
-        the first day of the month has position 0 in the map.
-        In the future, to get a map for a specific year / month,
-        we simply scroll to a given number of years / months
+    /**
+     * The days bits map
      */
     private byte map = 0;
     /**
-     * week bitmap for schedule '*'
+     * The week's days bits map for schedule '*'
      */
     public static final byte FULL_MAP = (byte)0x7F;
 
@@ -135,6 +131,13 @@ class DaysMap
      */
     public static byte rollMapByYear(byte map, int year)
     {
+        /*
+            We believe that we set the days of January 1995.
+            Because for 01.01.1995 fell on Sunday, that is,
+            the first day of the month has position 0 in the map.
+            In the future, to get a map for a specific year / month,
+            we simply scroll to a given number of years / months
+         */
         int years = year - 1995; // how many years have passed since 1995?
         int leaps = (year - 1993) / 4; // and how many leap years?
         int shift = years + leaps;

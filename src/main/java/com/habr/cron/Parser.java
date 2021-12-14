@@ -24,7 +24,7 @@ class Parser
     public void parse(String schedule) throws ScheduleFormatException
     {
         if ( schedule == null || schedule.trim().isEmpty() )
-            throw new IllegalArgumentException("Empty schedule.");
+            throw new ScheduleFormatException("Empty schedule.", schedule);
 
 
 

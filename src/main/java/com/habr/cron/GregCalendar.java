@@ -5,7 +5,10 @@ import java.util.TimeZone;
 
 /**
  * Very optimized version of Gregorian calendar system.
- * IMPORTANT NOTICE: works correct only range 2000..2100; Don't use out of interval
+ * IMPORTANT NOTICE: works correct only range 2000..2100; Don't use out of interval.
+ * In order to optimize, many mandatory checks are omitted.
+ * Do not use the class outside of the project.
+ * In case of problems, it is recommended to replace it with GregorianCalendar.
  */
 class GregCalendar
 {
@@ -129,7 +132,7 @@ class GregCalendar
     /**
      * Checks year for leap.
      *
-     * @param year
+     * @param year the year number
      * @return 1 for leap year, and 0 - for another.
      */
     public static int isLeap(int year)
@@ -138,9 +141,10 @@ class GregCalendar
     }
 
     /**
-     * Checks what current day is correct.
+     * Checks what current date is correct.
+     * NOTE: optimized limited checks.
      *
-     * @return true if current day is correct.
+     * @return true if current date is correct.
      */
     public boolean isCorrect()
     {

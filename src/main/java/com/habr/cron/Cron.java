@@ -13,6 +13,7 @@ public interface Cron
      *
      * @param d the specified time
      * @return the nearest time in the schedule
+     * @throws IllegalStateException when the next value if out of schedule
      */
     Date NearestEvent(Date d);
 
@@ -22,6 +23,7 @@ public interface Cron
      *
      * @param d the specified time
      * @return the nearest time in the schedule
+     * @throws IllegalStateException when the next value if out of schedule
      */
     Date NearestPrevEvent(Date d);
 
@@ -30,6 +32,7 @@ public interface Cron
      *
      * @param d the specified time
      * @return the nearest time in the schedule
+     * @throws IllegalStateException when the next value if out of schedule
      */
     Date NextEvent(Date d);
 
@@ -38,6 +41,7 @@ public interface Cron
      *
      * @param d the specified time
      * @return the nearest time in the schedule
+     * @throws IllegalStateException when the next value if out of schedule
      */
     Date PrevEvent(Date d);
 }

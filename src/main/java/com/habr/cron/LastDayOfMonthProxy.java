@@ -4,7 +4,6 @@ import static com.habr.cron.ScheduleElements.FEBRUARY_LEAP_DAY;
 import static com.habr.cron.ScheduleElements.LAST_DAY_OF_MONTH_CODE;
 /**
  * Proxy-matcher for days, then in condition used single magic day ',32,'
- * (makes proxy for 'HashMapMatcher')
  * Unmodified object. Thread-safe.
  */
 class LastDayOfMonthProxy implements DigitMatcher
@@ -22,10 +21,6 @@ class LastDayOfMonthProxy implements DigitMatcher
     {
         int min = matcher.getLow();
         int max = matcher.getHigh();
-
-        if ( min < max && max < FEBRUARY_LEAP_DAY )
-            return matcher.match(value);
-
 
         int actualMax = calendar.getMaxDay();
 

@@ -9,7 +9,7 @@ public class LastDayOfMonthProxyTest
     @Test
     public void testNextOnLastFebDay() throws Exception
     {
-        DigitMatcher matcher = new HashMapMatcher(1, 31);
+        DigitMatcher matcher = new ArrayMatcher(1, 31);
         MapMatcher map = (MapMatcher) matcher;
         map.addRange(23, 27, 1);
         map.addRange(29, 29, 1);
@@ -45,7 +45,7 @@ public class LastDayOfMonthProxyTest
     @Test
     public void testNextOnLastApril() throws Exception
     {
-        DigitMatcher matcher = new HashMapMatcher(1, 31);
+        DigitMatcher matcher = new ArrayMatcher(1, 31);
         MapMatcher map = (MapMatcher) matcher;
         map.addRange(23, 27, 1);
         map.addRange(31, 31, 1);
@@ -75,7 +75,7 @@ public class LastDayOfMonthProxyTest
     @Test
     public void testPrevOnLastFebDay() throws Exception
     {
-        DigitMatcher matcher = new HashMapMatcher(1, 31);
+        DigitMatcher matcher = new ArrayMatcher(1, 31);
         MapMatcher map = (MapMatcher) matcher;
         map.addRange(29, 31, 1);
         map.finishRange();
@@ -97,7 +97,7 @@ public class LastDayOfMonthProxyTest
     @Test
     public void testPrevOnLatAprilDay() throws Exception
     {
-        DigitMatcher matcher = new HashMapMatcher(1, 33);
+        DigitMatcher matcher = new ArrayMatcher(1, 33);
         MapMatcher map = (MapMatcher) matcher;
         map.addRange(31, 33, 1); // synthetic range for test only
         map.finishRange();
@@ -113,7 +113,7 @@ public class LastDayOfMonthProxyTest
         assertFalse(proxy.hasPrev(33)); // but 32th is overflow on February; there is no previous value in schedule
 
         // now let's add another range
-        matcher = new HashMapMatcher(1, 33);
+        matcher = new ArrayMatcher(1, 33);
         map = (MapMatcher) matcher;
         map.addRange(23, 27, 1);
         map.addRange(31, 33, 1); // synthetic range for test only
@@ -127,7 +127,7 @@ public class LastDayOfMonthProxyTest
     @Test
     public void testPrevTroughLastFebDay() throws Exception
     {
-        DigitMatcher matcher = new HashMapMatcher(1, 31);
+        DigitMatcher matcher = new ArrayMatcher(1, 31);
         MapMatcher map = (MapMatcher) matcher;
         map.addRange(23, 27, 1);
         map.addRange(29, 31, 1);
@@ -156,7 +156,7 @@ public class LastDayOfMonthProxyTest
     @Test
     public void testIsAboveTroughLastFebDay() throws Exception
     {
-        DigitMatcher matcher = new HashMapMatcher(1, 31);
+        DigitMatcher matcher = new ArrayMatcher(1, 31);
         MapMatcher map = (MapMatcher) matcher;
         map.addRange(23, 27, 1);
         map.addRange(29, 29, 1);

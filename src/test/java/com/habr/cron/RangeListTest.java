@@ -46,10 +46,13 @@ public class RangeListTest
     public void testIsSimpleRanges() throws Exception
     {
         assertTrue(list.isSimpleRanges());
-        assertFalse(RangeList.ASTERISK.isSimpleRanges());
+        assertTrue(RangeList.ASTERISK.isSimpleRanges());
 
-        RangeList singleRange = new RangeList(1);
-        assertFalse(singleRange.isSimpleRanges());
+        RangeList singleRange = new RangeList(new Range(1));
+        assertTrue(singleRange.isSimpleRanges());
+
+        singleRange = new RangeList(new Range(1, 10, 2));
+        assertTrue(singleRange.isSimpleRanges());
 
         {
             RangeList ranges = new RangeList(2); // not intersects
@@ -92,6 +95,15 @@ public class RangeListTest
     @Test
     public void testIsSimpleIntervals() throws Exception
     {
+        assertTrue(list.isSimpleRanges());
+        assertTrue(RangeList.ASTERISK.isSimpleIntervals());
+
+        RangeList singleRange = new RangeList(new Range(1));
+        assertTrue(singleRange.isSimpleIntervals());
+
+        singleRange = new RangeList(new Range(1, 10, 2));
+        assertTrue(singleRange.isSimpleIntervals());
+
         {
             RangeList ranges = new RangeList(2); // not intersects, with step
             ranges.add(new Range(3, 5));
@@ -287,6 +299,7 @@ public class RangeListTest
         ranges.add(new Range(8, 21));
         ranges.add(new Range(60, 70, 2));
 
+        ranges.sort();
         ranges.optimize(); // 4-21,30-40,50,60-70/2
 
         assertEquals(ranges.getCount(), 4);

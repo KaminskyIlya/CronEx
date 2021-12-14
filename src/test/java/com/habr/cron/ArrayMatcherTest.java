@@ -6,18 +6,15 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-/**
- * Test for HashMapMatcher
- */
-public class HashMapMatcherTest
+public class ArrayMatcherTest
 {
-    private HashMapMatcher matcher;
+    private ArrayMatcher matcher;
 
     @BeforeMethod
     public void setUp() throws Exception
     {
         // Setup schedule as "1,2,4,7-17/3,20-24/5,27"
-        matcher = new HashMapMatcher(1, 27); // IMPORTANT: 1 - minimal available value
+        matcher = new ArrayMatcher(1, 27); // IMPORTANT: 1 - minimal available value
         matcher.addRange(1,2,1);    // 1-2/1 = 1,2
         matcher.addRange(4,4,1);    // 4
         matcher.addRange(7,17,3);   // 7-17/3 = 7,10,13,16
@@ -27,9 +24,20 @@ public class HashMapMatcherTest
     }
 
     @Test
+    public void testIsCanApplied() throws Exception
+    {
+        assertTrue(ArrayMatcher.isCanApplied(1, 60));
+        assertTrue(ArrayMatcher.isCanApplied(1, 64));
+        assertTrue(ArrayMatcher.isCanApplied(100, 163));
+        assertFalse(ArrayMatcher.isCanApplied(1, 65));
+        assertTrue(ArrayMatcher.isCanApplied(900, 961));
+
+    }
+
+    @Test
     public void testAddValue() throws Exception
     {
-        HashMapMatcher matcher = new HashMapMatcher(1, 5);
+        ArrayMatcher matcher = new ArrayMatcher(1, 5);
         matcher.addValue(4);
         matcher.finishRange();
         assertTrue(matcher.match(4));
@@ -70,7 +78,7 @@ public class HashMapMatcherTest
     public void testGetNext(int value, int expected) throws Exception
     {
         int actual = matcher.getNext(value);
-        assertEquals(actual, expected, "HashMapMatcher return wrong next value.");
+        assertEquals(actual, expected, "ArrayMatcher return wrong next value.");
     }
 
     @DataProvider
@@ -114,7 +122,7 @@ public class HashMapMatcherTest
     public void testGetPrev(int value, int expected) throws Exception
     {
         int actual = matcher.getPrev(value);
-        assertEquals(actual, expected, "HashMapMatcher return wrong prev value.");
+        assertEquals(actual, expected, "ArrayMatcher return wrong prev value.");
     }
 
     @DataProvider
@@ -155,14 +163,14 @@ public class HashMapMatcherTest
     @Test
     public void testGetHigh() throws Exception
     {
-        HashMapMatcher matcher = new HashMapMatcher(1, 30);
+        ArrayMatcher matcher = new ArrayMatcher(1, 30);
         matcher.addRange(1, 5, 1);
         matcher.addRange(20, 29, 2);
         matcher.finishRange();
         assertEquals(matcher.getHigh(), 28);
 
 
-        matcher = new HashMapMatcher(1, 31);
+        matcher = new ArrayMatcher(1, 31);
         matcher.addRange(1, 5, 1);
         matcher.addRange(21, 31, 2);
         matcher.finishRange();
@@ -172,7 +180,7 @@ public class HashMapMatcherTest
     @Test
     public void testGetLow() throws Exception
     {
-        HashMapMatcher matcher = new HashMapMatcher(1, 31);
+        ArrayMatcher matcher = new ArrayMatcher(1, 31);
         matcher.addRange(2, 5, 1);
         matcher.addRange(21, 31, 2);
         matcher.finishRange();
@@ -182,7 +190,7 @@ public class HashMapMatcherTest
     @Test
     public void testFullRange() throws Exception
     {
-        HashMapMatcher matcher = new HashMapMatcher(1, 64);
+        ArrayMatcher matcher = new ArrayMatcher(1, 64);
         matcher.addRange(1, 20, 1);
         matcher.addRange(40, 64, 1);
         matcher.finishRange();

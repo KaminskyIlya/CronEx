@@ -15,9 +15,9 @@ import java.util.Arrays;
  * Used memory:
  *  144 bytes maximum, 26 bytes minimum
  */
-class HashMapMatcher implements DigitMatcher, MapMatcher
+class ArrayMatcher implements DigitMatcher, MapMatcher
 {
-    public static final int RANGE_LIMIT = 64;
+    public static final int RANGE_LIMIT = 64; // relative distance between min and max values
 
     private static final byte NO_NEXT = Byte.MAX_VALUE;
     private static final byte NO_PREV = Byte.MIN_VALUE;
@@ -48,13 +48,19 @@ class HashMapMatcher implements DigitMatcher, MapMatcher
 
 
 
-    public HashMapMatcher(int min, int max)
+    public ArrayMatcher(int min, int max)
     {
         this.min = min;
         this.max = max;
 
         next = new byte[max - min + 1]; Arrays.fill(next, NO_NEXT);
         prev = new byte[max - min + 1]; Arrays.fill(prev, NO_PREV);
+    }
+
+
+    public static boolean isCanApplied(int min, int max)
+    {
+        return (max - min) < RANGE_LIMIT;
     }
 
 

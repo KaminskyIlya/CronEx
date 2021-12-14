@@ -21,12 +21,12 @@ class MatcherPool
     /**
      * the bitmap for days of any month according the schedule
      */
-    private final DaysMap monthMap;
+    private final DaysMap monthMap; // default for January
     /**
      * full bitmap for days in year
      */
-    private final DaysMap normalYearMap;
-    private final DaysMap leapYearMap;
+    private final DaysMap normalYearMap; // default for 1995
+    private final DaysMap leapYearMap; // default for 1996
 
     /**
      * Has true, if date skipped in schedule or equals to '*.*.*'
@@ -38,7 +38,13 @@ class MatcherPool
     private final boolean anyWeekDay;
 
 
-
+    /**
+     * Creates matchers pool for current schedule model.
+     * Also creates days maps for week, for any month and any year.
+     *
+     * @param model current schedule model
+     * @throws ScheduleFormatException
+     */
     public MatcherPool(ScheduleModel model) throws ScheduleFormatException
     {
         // create matcher's for schedule model
@@ -53,14 +59,15 @@ class MatcherPool
 
         weekMap = createWeekMap(model.getModelFor(DAY_OF_WEEK)); // 1..7
         monthMap = createMonthMap(model.getModelFor(DAY_OF_MONTH)); // 1..31
-        normalYearMap = createYearMap(model.getModelFor(MONTH), false);
-        leapYearMap = createYearMap(model.getModelFor(MONTH), true);
+
+        normalYearMap = createYearMap(monthMap, model.getModelFor(MONTH), false);
+        leapYearMap = createYearMap(monthMap, model.getModelFor(MONTH), true);
 
         anyDate = model.isAnyDate();
         anyWeekDay = model.isAnyWeekDay();
 
         try {
-            fixYearsForLastFebruaryDay(model); // fix schedule for "???.02.29"
+            fixYearsForLastFebruaryDay(model); // fix schedule for "????.02.29"
         }
         catch (IllegalStateException e)
         {
@@ -68,7 +75,10 @@ class MatcherPool
         }
     }
 
-    public DigitMatcher[] getMatcherPool()
+    /**
+     * @return matcher for current schedule model
+     */
+    public DigitMatcher[] getMatchersForSchedule()
     {
         return pool;
     }
@@ -108,22 +118,25 @@ class MatcherPool
 
 
 
-
-
-
+    /**
+     * Creates bits map for all days in week according schedule
+     *
+     * @param ranges selected days in schedule
+     * @return days bits map for week
+     */
     private DaysMap createWeekMap(RangeList ranges)
     {
         DaysMap map = new DaysMap();
         for (Range range : ranges)
         {
-            if ( range == Range.ASTERISK )
-            {
-                map.setMap(DaysMap.FULL_MAP); // all days of the week
-            }
-            else if ( range.asterisk && range.step > 1 ) // all days of the week with step
+            if ( range.isAsterisk() && range.isStepped() )
             {
                 for (int i = 1; i <= 7; i += range.step)
                     map.addValue(i);
+            }
+            else if ( range.isAsterisk() )  // all days of the week
+            {
+                map.setMap(DaysMap.FULL_MAP);
             }
             else if ( range.isConstant() ) // specific day of the week
             {
@@ -131,28 +144,33 @@ class MatcherPool
             }
             else // range of days of the week with step
             {
-                for (int i = range.min; i <= range.max; i += range.step)
-                    map.addValue(i);
+                for (int day = range.min; day <= range.max; day += range.step)
+                    map.addValue(day);
             }
         }
         return map;
     }
 
 
-
+    /**
+     * Creates bits map for all days in any month according the schedule.
+     *
+     * @param ranges selected days in schedule
+     * @return days bits map for every month
+     */
     private DaysMap createMonthMap(RangeList ranges)
     {
         DaysMap map = new DaysMap();
         for (Range range : ranges)
         {
-            if ( range == Range.ASTERISK )
-            {
-                map.setMap(DaysMap.FULL_MAP); // all days of the week
-            }
-            else if ( range.asterisk && range.step > 1 ) // all days of the week with step
+            if ( range.isStepped() && range.isAsterisk() )
             {
                 for (int i = 1; i <= 31; i += range.step)
                     map.addValue(i);
+            }
+            else if ( range.isAsterisk() )  // all days of the week
+            {
+                map.setMap(DaysMap.FULL_MAP);
             }
             else if ( range.isLastDay() ) // last day of the month
             {
@@ -165,19 +183,21 @@ class MatcherPool
                 for (int i = range.min; i <= 31; i += range.step)
                     map.addValue(i);
 
+/*        // perhaps an extra code; need find special tests for detect this; for range 29-32
+
                 // gets valid start range for the 'last days' enumeration
                 int m = Math.max(range.min, 28); // 28th - is the first valid 'last' day
                 m -= (m - range.min) % range.step; // normalize to step
 
                 // adds the all possible last days numbers according step
                 for (int i = m; i <= 31; i += range.step)
-                    map.addValue(i);
+                    map.addValue(i);*/
             }
-            else if ( range.isConstant() ) // specific day of the week
+            else if ( range.isConstant() ) // specific day of the month
             {
                 map.addValue(range.getValue());
             }
-            else // range of days of the week with step
+            else // range of days of the month with step
             {
                 for (int i = range.min; i <= range.max; i += range.step)
                     map.addValue(i);
@@ -187,8 +207,15 @@ class MatcherPool
     }
 
 
-
-    private DaysMap createYearMap(RangeList months, boolean forLeap)
+    /**
+     * Creates bits map for all days in a year according the schedule.
+     *
+     * @param monthMap bits map for all days in a month
+     * @param months selected months in schedule
+     * @param forLeap must be true, if we calculates map for leap year.
+     * @return days bits map for year
+     */
+    private DaysMap createYearMap(DaysMap monthMap, RangeList months, boolean forLeap)
     {
         DaysMap result = new DaysMap();
         byte janMap = monthMap.getMap();
@@ -294,8 +321,7 @@ class MatcherPool
      */
     private int findNearestLeapYearFrom(int year, int v)
     {
-        GregorianCalendar calendar = new GregorianCalendar();
-        while ( !calendar.isLeapYear(year) )
+        while ( GregCalendar.isLeap(year) == 0 )
             year += v;
 
         return year;

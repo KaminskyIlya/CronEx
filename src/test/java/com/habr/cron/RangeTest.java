@@ -42,7 +42,7 @@ public class RangeTest {
     public void getValueMustException() throws Exception
     {
         Range range = new Range(1, 50, 10);
-        assertEquals(50, range.getValue());
+        assertEquals(50, range.getValue()); // assertion here
     }
 
     @Test

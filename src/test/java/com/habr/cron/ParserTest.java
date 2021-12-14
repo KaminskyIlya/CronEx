@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 
 public class ParserTest
 {
-    @Test(expectedExceptions = {ScheduleFormatException.class, IllegalArgumentException.class},
+    @Test(expectedExceptions = {ScheduleFormatException.class},
             dataProvider = "parseInvalid_DataProvider")
     public void testParse_WhenScheduleHasInvalidFormat(String schedule) throws Exception
     {
@@ -57,8 +57,8 @@ public class ParserTest
     {
         return new Object[][] {
             {"*.*.* * *:*:*.*",         "[*.*.*] * [*:*:*.*]"},
-            {"*.*.* 1,3,6 *:*:*.*",         "[*.*.*] 2,4,7 [*:*:*.*]"},
-            {"*.*.* 1-5/2 *:*:*.*",         "[*.*.*] 2-6/2 [*:*:*.*]"},
+            {"*.*.* 1,3,6 *:*:*.*",     "[*.*.*] 2,4,7 [*:*:*.*]"},
+            {"*.*.* 1-5/2 *:*:*.*",     "[*.*.*] 2-6/2 [*:*:*.*]"},
             {"*:*:*.*",                 "[*.*.*] * [*:*:*.*]"},
             {"*:*:*",                   "[*.*.*] * [*:*:*.0]"},
             {"*/4.1-4/4.32 12:*:*",     "[*/4.1-4/4.32] * [12:*:*.0]"},
@@ -66,6 +66,7 @@ public class ParserTest
             {"*.2.29 12:0-50/10:*",     "[*.2.29] * [12:0-50/10:*.0]"},
             {"2020.2.29 12:*:*",        "[2020.2.29] * [12:*:*.0]"},
             {"*.1-6/2.1,4-13/2,17,27 12:*/3:*",        "[*.1-6/2.1,4-13/2,17,27] * [12:*/3:*.0]"},
+            {"002020.001.3 * 1:1:1.004",         "[2020.1.3] * [1:1:1.4]"},
         };
     }
 }

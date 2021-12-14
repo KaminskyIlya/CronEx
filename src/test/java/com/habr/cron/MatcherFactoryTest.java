@@ -30,30 +30,36 @@ public class MatcherFactoryTest
         assertEquals(matcher.getClass(), IntervalMatcher.class);
 
         ranges = new RangeList(Range.ASTERISK);
-        matcher = MatcherFactory.createInstance(ranges, HOURS);
+        matcher = MatcherFactory.createInstance(ranges, MINUTES);
         assertEquals(matcher.getClass(), IntervalMatcher.class);
 
         ranges = new RangeList(new Range(3, true));
-        matcher = MatcherFactory.createInstance(ranges, HOURS);
+        matcher = MatcherFactory.createInstance(ranges, MILLIS);
         assertEquals(matcher.getClass(), SteppingMatcher.class);
 
         ranges = new RangeList(2);
         ranges.add(new Range(1, 5));
         ranges.add(new Range(9, 32));
         matcher = MatcherFactory.createInstance(ranges, HOURS);
-        assertEquals(matcher.getClass(), HashMapMatcher.class);
+        assertEquals(matcher.getClass(), ArrayMatcher.class);
 
         ranges = new RangeList(2);
         ranges.add(new Range(100, 101));
         ranges.add(new Range(150, 151));
         matcher = MatcherFactory.createInstance(ranges, MILLIS);
-        assertEquals(matcher.getClass(), HashMapMatcher.class);
+        assertEquals(matcher.getClass(), ArrayMatcher.class);
 
         ranges = new RangeList(2);
         ranges.add(new Range(0, 20));
         ranges.add(new Range(30, 63));
         matcher = MatcherFactory.createInstance(ranges, MILLIS);
-        assertEquals(matcher.getClass(), HashMapMatcher.class);
+        assertEquals(matcher.getClass(), ArrayMatcher.class);
+
+        ranges = new RangeList(2);
+        ranges.add(new Range(900, 920));
+        ranges.add(new Range(930, 963));
+        matcher = MatcherFactory.createInstance(ranges, MILLIS);
+        assertEquals(matcher.getClass(), ArrayMatcher.class);
 
         ranges = new RangeList(2);
         ranges.add(new Range(100, 200));
@@ -89,12 +95,26 @@ public class MatcherFactoryTest
         ranges.add(new Range(250, 300, 4));
         matcher = MatcherFactory.createInstance(ranges, MILLIS);
         assertEquals(matcher.getClass(), ListOfRangesMatcher.class);
+
+        ranges = new RangeList(3);
+        ranges.add(new Range(900, 950, 2));
+        ranges.add(new Range(250, 300, 4));
+        ranges.add(new Range(100, 200, 3));
+        matcher = MatcherFactory.createInstance(ranges, MILLIS);
+        assertEquals(matcher.getClass(), ListOfRangesMatcher.class);
+
+        ranges = new RangeList(3);
+        ranges.add(new Range(900, 950, 2));
+        ranges.add(new Range(250, 300, 4));
+        ranges.add(new Range(910, 920, 3));
+        matcher = MatcherFactory.createInstance(ranges, MILLIS);
+        assertEquals(matcher.getClass(), BitMapMatcher.class); // because contains overlapped ranges with different steps
 /*
         ranges = new RangeList(2);
         ranges.add(new Range(100, 200, 3)); // this ranges was merged
         ranges.add(new Range(151, 300, 3));
         matcher = MatcherFactory.createInstance(ranges, MILLIS);
-        assertEquals(matcher.getClass(), SteppingMatcher.class); //TODO: for future realization
+        assertEquals(matcher.getClass(), ListOfRangesMatcher.class); //TODO: for future realization
 */
 
     }
