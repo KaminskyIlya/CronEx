@@ -1,11 +1,20 @@
 # CronEx
-Ultra quick scheduler with milliseconds resolution.
-Basic problem described in [https://habr.com/ru/post/571342/](article).
-The average event search time is up to 400ns. 
-Thread-Safe. Unmodifiable.
-The source schedule can be of any complexity.
+Ultra quick scheduler with milliseconds (or microseconds) resolution.
 
-**Usage:**
+The average event search time is up to **200ns**.
+The average time of events generation is up to **20ns**.
+The source schedule can be of any complexity.
+Thread-Safe. Unmodifiable. Ready to work implementation (see the current release).
+
+If you want make microseconds resolution see [the algorithm description](How%20it%20works.EN.pdf) ([Russian version](How%20it%20works.RUS.pdf)).
+
+- [Usage](README.md#usage)
+- [Format of schedule](README.md#format-of-schedule)
+- [Handle exceptions](README.md#handle-exceptions)
+
+
+
+## Usage
 ```java
 import com.habr.cron.Cron;
 import com.habr.cron.Schedule;
@@ -53,7 +62,7 @@ public static void main(String args[]) throws Exception
 }
 ```
 
-**Format of schedule:**
+## Format of schedule:
 
     yyyy.MM.dd w HH:mm:ss.fff
     
@@ -107,3 +116,47 @@ You can specify 32 for a last day of month:
     *:00:00 - means the beginning of any hour    
     
     *.*.01 01:30:00 - means exactly at 01:30 on the first days of each month    
+
+## Handle exceptions
+
+The scheduler can throws **ScheduleFormatException** if the schedule is set incorrectly.
+For example, it's an empty schedule, or time not present, or some number cann't be parsed.
+
+The scheduler can throws **IllegalStateException** when the next value if out of schedule.
+For example, the schedule is set only for 2021, but the current date is 2022.
+
+```java
+
+/*
+ * handle exception due parsing
+ */
+public static void main(String args[]) throws ScheduleFormatException
+{
+  try
+  {
+     Cron cron = new Schedule("2012.12.31"); // invalid of schedule format
+  }
+  catch(ScheduleFormatException e)
+  {
+     System.out.prinln(e.getMessage()); // "Time MUST follow AFTER date. Trouble in this schedule: 2012.12.31"
+  }
+} 
+
+/*
+ * handle exception due searching
+ */
+public static void main(String args[]) throws ScheduleFormatException
+{
+  Cron cron = new Schedule("2012.12.31 *:*:*"); // the date of the "End of the World"
+  
+  try
+  {
+     Date current = new Date();
+     Date next = cron.NextEvent(current);
+  }
+  catch(IllegalStateException e)
+  {
+     System.out.prinln(e.getMessage());
+  }
+} 
+```
